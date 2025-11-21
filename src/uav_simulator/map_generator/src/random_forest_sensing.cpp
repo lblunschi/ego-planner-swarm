@@ -31,7 +31,7 @@ uniform_real_distribution<double> rand_w;
 uniform_real_distribution<double> rand_h;
 uniform_real_distribution<double> rand_inf;
 
-// 定义订阅者和发布者
+// Define subscribers and publishers
 rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr _local_map_pub;
 rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr _all_map_pub;
 rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr click_map_pub_;
@@ -62,7 +62,7 @@ pcl::PointCloud<pcl::PointXYZ> cloudMap;
 sensor_msgs::msg::PointCloud2 localMap_pcd;
 pcl::PointCloud<pcl::PointXYZ> clicked_cloud_;
 
-// 随机地图生成
+// Random map generation
 void RandomMapGenerate() {
     pcl::PointXYZ pt_random;
 
@@ -157,8 +157,8 @@ void RandomMapGenerate() {
 
 }
 
-// 生成随机障碍，柱形和圆形
-// 相较于上面那个函数增加了距离限制和缩放因子
+// Generate random obstacles, cylindrical and circular
+// Compared to the function above, this adds distance limits and scaling factors.
 void RandomMapGenerateCylinder() {
     pcl::PointXYZ pt_random;
 
@@ -176,7 +176,7 @@ void RandomMapGenerateCylinder() {
   rand_z_ = uniform_real_distribution<double>(z_l_, z_h_);
 
   // generate polar obs
-  // 生成柱形
+  // Generate column margins and scaling factors
   for (int i = 0; i < _obs_num && rclcpp::ok(); i++) {
     double x, y, w, h, inf;
     x = rand_x(eng);
@@ -223,7 +223,6 @@ void RandomMapGenerateCylinder() {
   }
 
   // generate circle obs
-  // 生成圆形
   for (int i = 0; i < circle_num_; ++i) {
     double x, y, z;
     x = rand_x(eng);
@@ -273,13 +272,13 @@ void RandomMapGenerateCylinder() {
 
   RCLCPP_WARN(rclcpp::get_logger("RandomMapGenerateCylinder"), "Finished generate random map "); 
 
-  // 将cloudmap转换为一个基于kd tree的点云地图
+  // Convert the cloudmap into a kd-tree based point cloud map
   kdtreeLocalMap.setInputCloud(cloudMap.makeShared());
 
   _map_ok = true;
 }
 
-// 里程计信息订阅回调
+// Odometry information subscription callback
 void rcvOdometryCallback(const nav_msgs::msg::Odometry &odom) {
     if (odom.child_frame_id == "X" || odom.child_frame_id == "O") return;
     _has_odom = true;
@@ -298,22 +297,22 @@ void rcvOdometryCallback(const nav_msgs::msg::Odometry &odom) {
 }
 
 int i = 0;
-// 发布点云信息
+// Publish point cloud information
 void pubSensedPoints() {
-    // 将点云转换为 ROS2 消息格式并发布
+    // Convert the point cloud to ROS2 message format and publish it.
     pcl::toROSMsg(cloudMap, globalMap_pcd);
     globalMap_pcd.header.frame_id = "world";
     _all_map_pub->publish(globalMap_pcd);
 
-    return; // 有这个return后续的代码都不会执行
+    return; // With this return statement, subsequent code will not be executed.
 
     /* ---------- only publish points around current position ---------- */
-    // 只有地图生成完毕且有位置信息（里程计数据）时，才会发布局部地图
+    // A partial map will only be published once the map has been generated and location information (odometer data) is available.
     if (!_map_ok || !_has_odom) return;
 
     pcl::PointCloud<pcl::PointXYZ> localMap;
 
-    // 设置搜索点
+    // et search point
     pcl::PointXYZ searchPoint(_state[0], _state[1], _state[2]);
     pointIdxRadiusSearch.clear();
     pointRadiusSquaredDistance.clear();
@@ -321,7 +320,7 @@ void pubSensedPoints() {
     if (std::isnan(searchPoint.x) || std::isnan(searchPoint.y) || std::isnan(searchPoint.z))
         return;
 
-    // 搜索感知范围内的点并构建局部地图
+    // Search for points within the sensing range and build a local map
     if (kdtreeLocalMap.radiusSearch(searchPoint, _sensing_range,
                                     pointIdxRadiusSearch,
                                     pointRadiusSquaredDistance) > 0) {
@@ -334,7 +333,7 @@ void pubSensedPoints() {
         return;
     }
 
-    // 发布局部地图
+    // Publish partial map
     localMap.width = localMap.points.size();
     localMap.height = 1;
     localMap.is_dense = true;
@@ -344,23 +343,23 @@ void pubSensedPoints() {
     _local_map_pub->publish(localMap_pcd);
 }
 
-// 根据点击的位置，在地图中添加一个随机大小的柱状障碍物，并将其发布为一个局部地图
+// Based on the clicked location, add a columnar obstacle of random size to the map and publish it as a local map.
 void clickCallback(const geometry_msgs::msg::PoseStamped &msg) {
-    // 提取点的位置并生成障碍物
+    // Extract the location of the point and generate obstacles
     double x = msg.pose.position.x;
     double y = msg.pose.position.y;
     double w = rand_w(eng);
     double h;
     pcl::PointXYZ pt_random;
 
-    // 将点击的位置对齐到网格
+    // Align the clicked position to the grid
     x = std::floor(x / _resolution) * _resolution + _resolution / 2.0;
     y = std::floor(y / _resolution) * _resolution + _resolution / 2.0;
 
-    // 计算障碍物的宽度
+    // Calculate the width of the obstacle
     int widNum = std::ceil(w / _resolution);
 
-    // 生成障碍物
+    // Generate obstacles
     for (int r = -widNum / 2.0; r < widNum / 2.0; r++) {
         for (int s = -widNum / 2.0; s < widNum / 2.0; s++) {
             h = rand_h(eng);
@@ -375,7 +374,7 @@ void clickCallback(const geometry_msgs::msg::PoseStamped &msg) {
         }
     }
 
-    // 更新点云属性并发布局部地图
+    // Update point cloud properties and publish a local map
     clicked_cloud_.width = clicked_cloud_.points.size();
     clicked_cloud_.height = 1;
     clicked_cloud_.is_dense = true;
@@ -396,16 +395,16 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("random_map_sensing");
 
-    // 创建发布者
+    // Create Publisher
     _local_map_pub = node->create_publisher<sensor_msgs::msg::PointCloud2>("/map_generator/local_cloud", 1);
     _all_map_pub = node->create_publisher<sensor_msgs::msg::PointCloud2>("/map_generator/global_cloud", 1);
     click_map_pub_ = node->create_publisher<sensor_msgs::msg::PointCloud2>("/pcl_render_node/local_map", 1);
 
-    // 创建订阅者
+    // Create subscriber
     _odom_sub = node->create_subscription<nav_msgs::msg::Odometry>("odometry", 50, rcvOdometryCallback);
     // auto click_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>("/goal", 10, clickCallback);
 
-    // 声明和获取参数
+    // Declare and retrieve parameters
     node->declare_parameter("init_state_x", 0.0);
     node->declare_parameter("init_state_y", 0.0);
     node->declare_parameter("map/x_size", 50.0);
@@ -454,7 +453,7 @@ int main(int argc, char **argv)
     node->get_parameter("sensing/rate", _sense_rate);
     node->get_parameter("min_distance", _min_dist);
 
-    // 地图边界和障碍物的设置
+    // Setting map boundaries and obstacles
     _x_l = -_x_size / 2.0;
     _x_h = +_x_size / 2.0;
     _y_l = -_y_size / 2.0;
@@ -464,20 +463,20 @@ int main(int argc, char **argv)
 
     rclcpp::sleep_for(std::chrono::milliseconds(500));
 
-    // 初始化随机数生成器
+    // Initialize the random number generator
     unsigned int seed = rd();
     // unsigned int seed = 2433201515;
     std::cout << "seed=" << seed << std::endl;
     eng.seed(seed);
 
-    // 生成随机地图
+    // Generate random map
     // RandomMapGenerate();
     RandomMapGenerateCylinder();
 
-    // 设置循环频率并开始主循环
+    // Set the loop frequency and start the main loop
     rclcpp::Rate loop_rate(_sense_rate);
     while (rclcpp::ok()) {
-        // 发布感知到的点云数据
+        // Publish the perceived point cloud data
         pubSensedPoints();
         rclcpp::spin_some(node);
         loop_rate.sleep();

@@ -166,7 +166,7 @@ void cmdCallback()
   if (!receive_traj_)
     return;
 
-  // 统一时间源
+  // unified time source
   rclcpp::Clock clock(RCL_ROS_TIME);  
   rclcpp::Time time_now = clock.now();
   double t_cur = (time_now - start_time_).seconds();

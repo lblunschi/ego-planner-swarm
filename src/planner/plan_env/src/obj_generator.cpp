@@ -68,7 +68,7 @@ int main(int argc, char **argv)
   auto node = rclcpp::Node::make_shared("dynamic_obj");
 
   /* ---------- initialize ---------- */
-  /* 参数读取 */
+  /* Parameter loading */
   node->declare_parameter("obj_generator/obj_num", 20);
   node->declare_parameter("obj_generator/x_size", 10.0);
   node->declare_parameter("obj_generator/y_size", 10.0);

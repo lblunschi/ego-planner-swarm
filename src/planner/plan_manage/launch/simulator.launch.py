@@ -40,7 +40,7 @@ def generate_launch_description():
     odometry_topic_arg = DeclareLaunchArgument('odometry_topic', default_value=odometry_topic, description='Odometry topic')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     
-    # 地图属性以及是否使用动力学仿真
+    # map_generator or mockamap 
     use_mockamap = LaunchConfiguration('use_mockamap', default=False) # map_generator or mockamap 
     
     use_mockamap_arg = DeclareLaunchArgument('use_mockamap', default_value=use_mockamap, description='Choose map type, map_generator or mockamap')
