@@ -66,8 +66,8 @@ def generate_launch_description():
             'point0_y': target_y,
             'point0_z': target_z,
             
-            'point1_x': str(0.0),
-            'point1_y': str(15.0),
+            'point1_x': str(10.0),
+            'point1_y': str(5.0),
             'point1_z': str(1.0),
             
             'point2_x': str(15.0),

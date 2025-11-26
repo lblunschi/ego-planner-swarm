@@ -156,6 +156,46 @@ void RandomMapGenerate() {
   _map_ok = true;
 
 }
+// Very basic map: a filled cube of size 2 x 2 x 2 centered at (0, 0, 0)
+void CreateBasicCubeMap()
+{
+    cloudMap.clear();
+    cloudMap.points.clear();
+
+    pcl::PointXYZ pt;
+
+    // Half side length (2m cube => from -1 to +1 in x,y,z)
+    double half = 1.0;
+
+    // Use the existing resolution parameter for sampling
+    double step = _resolution > 0.0 ? _resolution : 0.1;
+    step = std::max(step, 0.2); // Limit to max 0.5m step
+    for (double x = -half; x <= half; x += step)
+    {
+        for (double y = -5*half; y <= 5*half; y += step)
+        {
+            for (double z = -20*half; z <= 20*half; z += step)
+            {
+                pt.x = x;
+                pt.y = y;
+                pt.z = z;
+                cloudMap.points.push_back(pt);
+            }
+        }
+    }
+
+    cloudMap.width    = cloudMap.points.size();
+    cloudMap.height   = 1;
+    cloudMap.is_dense = true;
+
+    // Optional, in case you still want to use the kd-tree
+    kdtreeLocalMap.setInputCloud(cloudMap.makeShared());
+
+    _map_ok = true;
+
+    RCLCPP_WARN(rclcpp::get_logger("CreateBasicCubeMap"),
+                "Created basic cube map with %zu points", cloudMap.points.size());
+}
 
 // Generate random obstacles, cylindrical and circular
 // Compared to the function above, this adds distance limits and scaling factors.
@@ -470,8 +510,10 @@ int main(int argc, char **argv)
     eng.seed(seed);
 
     // Generate random map
-    // RandomMapGenerate();
-    RandomMapGenerateCylinder();
+    //RandomMapGenerate();
+    // RandomMapGenerateCylinder();
+    // Generate a very basic map: cube at (0,0,0), size 2x2x2
+    CreateBasicCubeMap();
 
     // Set the loop frequency and start the main loop
     rclcpp::Rate loop_rate(_sense_rate);

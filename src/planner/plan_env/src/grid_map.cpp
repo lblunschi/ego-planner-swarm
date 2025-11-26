@@ -899,12 +899,12 @@ void GridMap::cloudCallback(const sensor_msgs::msg::PointCloud2::ConstPtr &img)
   posToIndex(Eigen::Vector3d(max_x, max_y, max_z), md_.local_bound_max_);
   posToIndex(Eigen::Vector3d(min_x, min_y, min_z), md_.local_bound_min_);
 
-  // 更新局部地图边界
+  // Update local map boundaries
   boundIndex(md_.local_bound_min_);
   boundIndex(md_.local_bound_max_);
 
   // add virtual ceiling to limit flight height
-  // 添加虚拟天花板控制飞行高度
+  // The update adds a virtual ceiling to control the flight altitude boundary.
   if (mp_.virtual_ceil_height_ > -0.5) {
     int ceil_id = floor((mp_.virtual_ceil_height_ - mp_.map_origin_(2)) * mp_.resolution_inv_) - 1;
     for (int x = md_.local_bound_min_(0); x <= md_.local_bound_max_(0); ++x)

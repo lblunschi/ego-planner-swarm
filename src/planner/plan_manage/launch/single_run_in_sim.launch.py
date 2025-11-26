@@ -110,13 +110,13 @@ def generate_launch_description():
             'cy': str(243.44969177246094),
             'fx': str(387.229248046875),
             'fy': str(387.229248046875),
-            'max_vel': str(2.0),
-            'max_acc': str(6.0),
-            'planning_horizon': str(7.5),
+            'max_vel': str(0.5),
+            'max_acc': str(2.0),
+            'planning_horizon': str(5.0),
             'use_distinctive_trajs': 'True',
             'flight_type': str(2),
             'point_num': str(4),
-            'point0_x': str(15.0),
+            'point0_x': str(8.0),
             'point0_y': str(0.0),
             'point0_z': str(1.0),
             
@@ -125,11 +125,11 @@ def generate_launch_description():
             'point1_z': str(1.0),
             
             'point2_x': str(15.0),
-            'point2_y': str(0.0),
+            'point2_y': str(10.0),
             'point2_z': str(1.0),
             
             'point3_x': str(-15.0),
-            'point3_y': str(0.0),
+            'point3_y': str(10.0),
             'point3_z': str(1.0),
             
             'point4_x': str(15.0),
@@ -162,7 +162,7 @@ def generate_launch_description():
             'map_size_x_': map_size_x,
             'map_size_y_': map_size_y,
             'map_size_z_': map_size_z,
-            'init_x_': str(-15.0),
+            'init_x_': str(-5.0),
             'init_y_': str(0.0),
             'init_z_': str(0.1),
             'odometry_topic': odom_topic

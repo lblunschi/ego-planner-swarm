@@ -227,7 +227,7 @@ def generate_launch_description():
         name=['drone_', drone_id, '_pcl_render_node'],
         output='screen',
         parameters=[
-            {'sensing_horizon': 5.0},
+            {'sensing_horizon': 3.0},
             {'sensing_rate': 30.0},
             {'estimation_rate': 30.0},
             {'map/x_size': map_size_x_},
