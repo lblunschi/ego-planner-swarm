@@ -41,9 +41,9 @@ void GridMap::initMap(rclcpp::Node::SharedPtr node)
   node_->declare_parameter("grid_map/virtual_ceil_yn", -0.1);
   node_->declare_parameter("grid_map/show_occ_time", false);
   node_->declare_parameter("grid_map/pose_type", 1);
-  node_->declare_parameter("grid_map/frame_id", "world");
+  node_->declare_parameter("grid_map/frame_id", "ego_world");
   node_->declare_parameter("grid_map/local_map_margin", 1);
-  node_->declare_parameter("grid_map/ground_height", 1.0);
+  node_->declare_parameter("grid_map/ground_height", -13.0);
   node_->declare_parameter("grid_map/odom_depth_timeout", 1.0);
 
   node_->get_parameter("grid_map/resolution", mp_.resolution_);
@@ -795,12 +795,11 @@ void GridMap::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom)
 {
   if (md_.has_first_depth_)
     return;
-
   md_.camera_pos_(0) = odom->pose.pose.position.x;
   md_.camera_pos_(1) = odom->pose.pose.position.y;
   md_.camera_pos_(2) = odom->pose.pose.position.z;
-
   md_.has_odom_ = true;
+  
 }
 
 void GridMap::cloudCallback(const sensor_msgs::msg::PointCloud2::ConstPtr &img)

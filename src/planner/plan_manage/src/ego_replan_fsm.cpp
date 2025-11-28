@@ -665,10 +665,10 @@ namespace ego_planner
 
     LocalTrajData *info = &planner_manager_->local_data_;
     // ros::Time time_now = ros::Time::now();
+    
     auto time_now = rclcpp::Clock().now();
     // double t_cur = (time_now - info->start_time_).toSec();
     double t_cur = (time_now - info->start_time_).seconds();
-
     start_pt_ = info->position_traj_.evaluateDeBoorT(t_cur);
     start_vel_ = info->velocity_traj_.evaluateDeBoorT(t_cur);
     start_acc_ = info->acceleration_traj_.evaluateDeBoorT(t_cur);
@@ -784,7 +784,31 @@ namespace ego_planner
   {
 
     getLocalTarget();
+     // ----------------------------
+    // 1) Compute tracking error
+    // ----------------------------
+    auto info = &planner_manager_->local_data_;
 
+    if (info->duration_ > 1e-3)  // make sure we actually have a previous traj
+    {
+      double t_cur = (rclcpp::Clock().now() - info->start_time_).seconds();
+      t_cur = std::max(0.0, std::min(t_cur, info->duration_));
+
+      Eigen::Vector3d planned_pos = info->position_traj_.evaluateDeBoorT(t_cur);
+      double tracking_error = (planned_pos - odom_pos_).norm();
+
+      if (tracking_error > 1.0)  // TODO tune this threshold
+      {
+        RCLCPP_WARN(
+            node_->get_logger(),
+            "Large tracking error detected: %.2f m. Forcing polynomial initialization.",
+            tracking_error);
+        flag_use_poly_init = true; 
+        start_pt_  = odom_pos_;         
+        start_vel_ = odom_vel_;
+        start_acc_.setZero();           
+      }
+    }
     bool plan_and_refine_success =
         planner_manager_->reboundReplan(start_pt_, start_vel_, start_acc_, local_target_pt_, local_target_vel_, (have_new_target_ || flag_use_poly_init), flag_randomPolyTraj);
     have_new_target_ = false;

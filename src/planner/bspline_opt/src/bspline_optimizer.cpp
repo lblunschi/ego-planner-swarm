@@ -1254,7 +1254,18 @@ namespace ego_planner
         }
         if (j < 0) // fail to get the obs free point
         {
-          RCLCPP_ERROR(rclcpp::get_logger("check_collision_and_rebound"), "ERROR! the drone is in obstacle. This should not happen.");
+          RCLCPP_ERROR(rclcpp::get_logger("check_collision_and_rebound"),
+                      "ERROR! the drone is inside an obstacle. This should not happen.");
+
+          for (int t = 0; t < cps_.size; ++t)
+          {
+            Eigen::Vector3d p = cps_.points.col(t);
+            bool occ_here = grid_map_->getInflateOccupancy(p);
+            RCLCPP_ERROR(rclcpp::get_logger("check_collision_and_rebound"),
+                        "CP %d: (%.2f, %.2f, %.2f) occ=%d",
+                        t, p.x(), p.y(), p.z(), (int)occ_here);
+          }
+
           in_id = 0;
         }
 

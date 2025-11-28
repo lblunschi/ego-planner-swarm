@@ -28,7 +28,7 @@ void pubOdom()
 {
     auto odom = nav_msgs::msg::Odometry();
     odom.header.stamp = rclcpp::Clock().now();
-    odom.header.frame_id = "world";
+    odom.header.frame_id = "ego_world";
 
     if (rcv_cmd)
     {
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     // Create subscribers and publishers
     _cmd_sub = node->create_subscription<quadrotor_msgs::msg::PositionCommand>(
         "command", 1, rcvPosCmdCallBack);
-    _odom_pub = node->create_publisher<nav_msgs::msg::Odometry>("odometry", 1);
+    _odom_pub = node->create_publisher<nav_msgs::msg::Odometry>("/old_odometry", 1);
 
     // Main loop, publish odometer information
     rclcpp::Rate rate(100);  // 100Hz

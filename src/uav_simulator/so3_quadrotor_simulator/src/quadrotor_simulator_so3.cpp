@@ -192,6 +192,7 @@ cmd_callback(const quadrotor_msgs::msg::SO3Command::ConstPtr &cmd)
     command.corrections[2] = cmd->aux.angle_corrections[1];
     command.current_yaw = cmd->aux.current_yaw;
     command.use_external_yaw = cmd->aux.use_external_yaw;
+
 }
 
 static void
@@ -216,7 +217,6 @@ void stateToOdomMsg(const QuadrotorSimulator::Quadrotor::State &state,
     odom.pose.pose.position.x = state.x(0);
     odom.pose.pose.position.y = state.x(1);
     odom.pose.pose.position.z = state.x(2);
-
     Eigen::Quaterniond q(state.R);
     odom.pose.pose.orientation.x = q.x();
     odom.pose.pose.orientation.y = q.y();
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
     auto node = rclcpp::Node::make_shared("quadrotor_simulator_so3");
 
     // Publishers
-    auto odom_pub_ = node->create_publisher<nav_msgs::msg::Odometry>("odom", 100);
+    auto odom_pub_ = node->create_publisher<nav_msgs::msg::Odometry>("old_odom", 100);
     auto imu_pub_ = node->create_publisher<sensor_msgs::msg::Imu>("imu", 10);
 
     // Subscribers
@@ -308,7 +308,7 @@ int main(int argc, char **argv)
     Control control;
 
     nav_msgs::msg::Odometry odom_msg;
-    odom_msg.header.frame_id = "/world";
+    odom_msg.header.frame_id = "/ego_world";
     odom_msg.child_frame_id = "/" + quad_name;
 
     sensor_msgs::msg::Imu imu;

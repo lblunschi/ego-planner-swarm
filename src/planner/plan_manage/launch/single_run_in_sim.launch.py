@@ -16,8 +16,8 @@ def generate_launch_description():
     
     map_size_x = LaunchConfiguration('map_size_x', default = 50.0)
     map_size_y = LaunchConfiguration('map_size_y', default = 25.0)
-    map_size_z = LaunchConfiguration('map_size_z', default = 2.0)
-    odom_topic = LaunchConfiguration('odom_topic', default = 'visual_slam/odom')
+    map_size_z = LaunchConfiguration('map_size_z', default = 13.0)
+    odom_topic = LaunchConfiguration('odom_topic', default = 'odometry')
     
     
     # Declare global parameters
@@ -46,7 +46,7 @@ def generate_launch_description():
         parameters=[
             {'map/x_size': 26.0},
             {'map/y_size': 20.0},
-            {'map/z_size': 3.0},
+            {'map/z_size': 13.0},
             {'map/resolution': 0.1},
             {'ObstacleShape/seed': 1.0},
             {'map/obs_num': 250},
@@ -110,31 +110,31 @@ def generate_launch_description():
             'cy': str(243.44969177246094),
             'fx': str(387.229248046875),
             'fy': str(387.229248046875),
-            'max_vel': str(0.5),
-            'max_acc': str(2.0),
+            'max_vel': str(0.15),
+            'max_acc': str(0.2),
             'planning_horizon': str(5.0),
             'use_distinctive_trajs': 'True',
             'flight_type': str(2),
             'point_num': str(4),
             'point0_x': str(8.0),
             'point0_y': str(0.0),
-            'point0_z': str(1.0),
+            'point0_z': str(-2.0),
             
-            'point1_x': str(-15.0),
+            'point1_x': str(-8.0),
             'point1_y': str(0.0),
-            'point1_z': str(1.0),
+            'point1_z': str(-2.0),
             
-            'point2_x': str(15.0),
-            'point2_y': str(10.0),
-            'point2_z': str(1.0),
+            'point2_x': str(8.0),
+            'point2_y': str(8.0),
+            'point2_z': str(-2.0),
             
-            'point3_x': str(-15.0),
-            'point3_y': str(10.0),
-            'point3_z': str(1.0),
+            'point3_x': str(-8.0),
+            'point3_y': str(-8.0),
+            'point3_z': str(-2.0),
             
-            'point4_x': str(15.0),
+            'point4_x': str(8.0),
             'point4_y': str(0.0),
-            'point4_z': str(1.0),
+            'point4_z': str(-2.0),
         }.items()
     )
     
@@ -162,9 +162,9 @@ def generate_launch_description():
             'map_size_x_': map_size_x,
             'map_size_y_': map_size_y,
             'map_size_z_': map_size_z,
-            'init_x_': str(-5.0),
+            'init_x_': str(0.0),
             'init_y_': str(0.0),
-            'init_z_': str(0.1),
+            'init_z_': str(-2.0),
             'odometry_topic': odom_topic
         }.items()
     )

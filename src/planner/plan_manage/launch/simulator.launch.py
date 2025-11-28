@@ -23,7 +23,7 @@ def generate_launch_description():
     c_num = LaunchConfiguration('c_num', default=5)
     p_num = LaunchConfiguration('p_num', default=20)
     min_dist = LaunchConfiguration('min_dist', default=1.0)
-    odometry_topic = LaunchConfiguration('odometry_topic', default='visual_slam/odom')
+    odometry_topic = LaunchConfiguration('odometry_topic', default='odometry')
     drone_id = LaunchConfiguration('drone_id', default=0)
 
     # DeclareLaunchArguments
@@ -114,7 +114,7 @@ def generate_launch_description():
                     {'simulator/init_state_y': init_y},
                     {'simulator/init_state_z': init_z}],
         
-        remappings=[('odom', ['drone_', drone_id, '_visual_slam/odom']),
+        remappings=[('odom', ['model/bluerov2/', odometry_topic]),
                     ('cmd', ['drone_', drone_id, '_so3_cmd']),
                     ('force_disturbance', ['drone_', drone_id,'_force_disturbance']),
                     ('moment_disturbance', ['drone_', drone_id,'_moment_disturbance'])],
@@ -148,7 +148,7 @@ def generate_launch_description():
                 gains_file,
                 corrections_file
             ],
-            remappings=[('odom', ['drone_', drone_id, '_visual_slam/odom']),
+            remappings=[('odom', ['model/bluerov2/', odometry_topic]),
                         ('position_cmd', ['drone_', drone_id, '_planning/pos_cmd']),
                         ('motors', ['drone_', drone_id, '_motors']),
                         ('corrections', ['drone_', drone_id, '_corrections']),
@@ -180,7 +180,7 @@ def generate_launch_description():
         ],
         remappings=[
             ('command', ['drone_', drone_id, '_planning/pos_cmd']),
-            ('odometry', ['drone_', drone_id, '_', odometry_topic])
+            ('odometry', ['model/bluerov2/', odometry_topic])
         ],
         condition = UnlessCondition(use_dynamic)
     )
@@ -191,7 +191,7 @@ def generate_launch_description():
         name=['drone_', drone_id, '_odom_visualization'],
         output='screen',
         remappings=[
-            ('odom', ['drone_', drone_id, '_visual_slam/odom']),
+            ('odom', ['model/bluerov2/', odometry_topic]),
             ('robot', ['drone_', drone_id, '_vis/robot']),
             ('path', ['drone_', drone_id, '_vis/path']),
             ('time_gap', ['drone_', drone_id, '_vis/time_gap']),
@@ -237,7 +237,7 @@ def generate_launch_description():
         ],
         remappings=[
             ('global_map', '/map_generator/global_cloud'),
-            ('odometry', ['drone_', drone_id, '_', odometry_topic]),
+            ('odometry', ['model/bluerov2/', odometry_topic]),
             ('pcl_render_node/cloud', ['drone_', drone_id, '_pcl_render_node/cloud']),
             ('depth', ['drone_', drone_id, '_pcl_render_node/depth'])
         ]

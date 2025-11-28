@@ -77,10 +77,12 @@ namespace ego_planner
       start_end_derivatives.clear();
       flag_regenerate = false;
 
+      
       // If we enter the if-branch normally (usually on the first run), the do-block executes only once and just clears the point set.
       // If we enter the else-branch, abnormal situations may set flag_regenerate to true, causing the do-block to run again.
       if (flag_first_call || flag_polyInit || flag_force_polynomial /*|| ( start_pt - local_target_pt ).norm() < 1.0*/) // Initial path generated from a min-snap traj by order.
       {
+        std::cout << "Initial path generated from polynomial trajectory." << flag_first_call << flag_polyInit << flag_force_polynomial << std::endl;
         flag_first_call = false;
         flag_force_polynomial = false;
         // Used to store the generated trajectory
@@ -140,7 +142,7 @@ namespace ego_planner
       }
       else // Initial path generated from previous trajectory.
       {
-
+        std::cout << "From Previous polynomial trajectory." << std::endl;
         double t;
         double t_cur = (rclcpp::Clock().now() - local_data_.start_time_).seconds();
 

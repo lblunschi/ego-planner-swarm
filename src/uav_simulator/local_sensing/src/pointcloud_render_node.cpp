@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
   local_map_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(
       "local_map", 1, rcvLocalPointCloudCallBack);
   odom_sub = node->create_subscription<nav_msgs::msg::Odometry>(
-      "odometry", 50, rcvOdometryCallbck);
+      "/odometry", 50, rcvOdometryCallbck);
 
   // Published by: Point Cloud Data
   pub_cloud = node->create_publisher<sensor_msgs::msg::PointCloud2>("pcl_render_node/cloud", 10);

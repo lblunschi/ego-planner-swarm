@@ -164,38 +164,60 @@ void CreateBasicCubeMap()
 
     pcl::PointXYZ pt;
 
-    // Half side length (2m cube => from -1 to +1 in x,y,z)
-    double half = 1.0;
+    // ---- PARAMETERS ----
+    double pillar_radius = 0.5;            // meters
+    double z_min = -5.0;                   // pillar bottom
+    double z_max =  5.0;                   // pillar top
 
-    // Use the existing resolution parameter for sampling
     double step = _resolution > 0.0 ? _resolution : 0.1;
-    step = std::max(step, 0.2); // Limit to max 0.5m step
-    for (double x = -half; x <= half; x += step)
+    step = std::max(step, 0.2);            // safe upper bound
+
+    // ---- LOCATIONS OF 10 PILLARS ----
+    std::vector<std::pair<double,double>> centers = { {5.0, 3.0}, {5.0, 0.0}, {5.0, -3.0}, {0.0, 5.0},
+                                                      {0.0, -5.0}, {-5.0, 3.0}, {-5.0, 0.0}, {-5.0, -3.0},
+                                                      {3.0, 5.0}, {-3.0, -5.0}, {-2.0, 2.0}, {-2.0, -2.0} };
+    // (You can replace these with your exact 10 positions.)
+
+    // ---- GENERATE POINTS FOR EACH PILLAR ----
+    for(const auto &c : centers)
     {
-        for (double y = -5*half; y <= 5*half; y += step)
+        double cx = c.first;
+        double cy = c.second;
+
+        for(double x = cx - pillar_radius; x <= cx + pillar_radius; x += step)
         {
-            for (double z = -20*half; z <= 20*half; z += step)
+            for(double y = cy - pillar_radius; y <= cy + pillar_radius; y += step)
             {
-                pt.x = x;
-                pt.y = y;
-                pt.z = z;
-                cloudMap.points.push_back(pt);
+                // Only keep points inside the cylinder cross section
+                double dx = x - cx;
+                double dy = y - cy;
+                if(dx*dx + dy*dy > pillar_radius * pillar_radius)
+                    continue;
+
+                for(double z = z_min; z <= z_max; z += step)
+                {
+                    pt.x = x;
+                    pt.y = y;
+                    pt.z = z;
+                    cloudMap.points.push_back(pt);
+                }
             }
         }
     }
 
-    cloudMap.width    = cloudMap.points.size();
-    cloudMap.height   = 1;
+    cloudMap.width  = cloudMap.points.size();
+    cloudMap.height = 1;
     cloudMap.is_dense = true;
 
-    // Optional, in case you still want to use the kd-tree
     kdtreeLocalMap.setInputCloud(cloudMap.makeShared());
-
     _map_ok = true;
 
-    RCLCPP_WARN(rclcpp::get_logger("CreateBasicCubeMap"),
-                "Created basic cube map with %zu points", cloudMap.points.size());
+    RCLCPP_WARN(
+        rclcpp::get_logger("CreateBasicCubeMap"),
+        "Created pillar-map with %zu points", cloudMap.points.size()
+    );
 }
+
 
 // Generate random obstacles, cylindrical and circular
 // Compared to the function above, this adds distance limits and scaling factors.
@@ -341,7 +363,7 @@ int i = 0;
 void pubSensedPoints() {
     // Convert the point cloud to ROS2 message format and publish it.
     pcl::toROSMsg(cloudMap, globalMap_pcd);
-    globalMap_pcd.header.frame_id = "world";
+    globalMap_pcd.header.frame_id = "ego_world";
     _all_map_pub->publish(globalMap_pcd);
 
     return; // With this return statement, subsequent code will not be executed.
@@ -379,7 +401,7 @@ void pubSensedPoints() {
     localMap.is_dense = true;
 
     pcl::toROSMsg(localMap, localMap_pcd);
-    localMap_pcd.header.frame_id = "world";
+    localMap_pcd.header.frame_id = "ego_world";
     _local_map_pub->publish(localMap_pcd);
 }
 
@@ -420,7 +442,7 @@ void clickCallback(const geometry_msgs::msg::PoseStamped &msg) {
     clicked_cloud_.is_dense = true;
 
     pcl::toROSMsg(clicked_cloud_, localMap_pcd);
-    localMap_pcd.header.frame_id = "world";
+    localMap_pcd.header.frame_id = "ego_world";
     click_map_pub_->publish(localMap_pcd);
 
     cloudMap.width = cloudMap.points.size();
@@ -441,7 +463,7 @@ int main(int argc, char **argv)
     click_map_pub_ = node->create_publisher<sensor_msgs::msg::PointCloud2>("/pcl_render_node/local_map", 1);
 
     // Create subscriber
-    _odom_sub = node->create_subscription<nav_msgs::msg::Odometry>("odometry", 50, rcvOdometryCallback);
+    _odom_sub = node->create_subscription<nav_msgs::msg::Odometry>("/odometry", 50, rcvOdometryCallback);
     // auto click_sub = node->create_subscription<geometry_msgs::msg::PoseStamped>("/goal", 10, clickCallback);
 
     // Declare and retrieve parameters
