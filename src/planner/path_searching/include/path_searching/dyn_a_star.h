@@ -8,7 +8,7 @@
 #include <plan_env/grid_map.h>
 #include <queue>
 
-constexpr double inf = 1 >> 20;
+constexpr double inf = 1 << 20;
 struct GridNode;
 typedef GridNode *GridNodePtr;
 
@@ -32,13 +32,12 @@ struct GridNode
 	GridNodePtr cameFrom{NULL};
 };
 
-class NodeComparator
-{
-public:
-	bool operator()(GridNodePtr node1, GridNodePtr node2)
-	{
-		return node1->fScore > node2->fScore;
-	}
+using OpenItem = std::pair<double, GridNodePtr>; // (fScore_at_push, node)
+
+struct OpenItemComparator {
+  bool operator()(const OpenItem& a, const OpenItem& b) const {
+    return a.first > b.first;
+  }
 };
 
 class AStar
@@ -72,7 +71,7 @@ private:
 	std::vector<GridNodePtr> gridPath_;
 
 	GridNodePtr ***GridNodeMap_;
-	std::priority_queue<GridNodePtr, std::vector<GridNodePtr>, NodeComparator> openSet_;
+	std::priority_queue<OpenItem, std::vector<OpenItem>, OpenItemComparator> openSet_;
 
 	int rounds_{0};
 
